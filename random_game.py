@@ -37,7 +37,6 @@ class ButtonCountry(ButtonBehavior, Image):
 
         self.control = control
 
-
     # Temporary
     # This Function
     # hows the poses of the buttons....
@@ -86,7 +85,6 @@ class Country(Layout, Image):
         Layout.__init__(self, **kwargs)
         Image.__init__(self, **kwargs)
 
-
         # Layout attributes
         self.size = (100, 100)
         self.size_hint = (0.5, 0.5)
@@ -109,7 +107,7 @@ class Country(Layout, Image):
 
         # Text - Number of Armies
         self.armies_counter_label = Label(text=str(self.armies_counter), markup=True,
-                                size=(15, 15), pos=(self.button_pos[0], self.button_pos[1]+15))
+                                          size=(15, 15), pos=(self.button_pos[0], self.button_pos[1] + 15))
         self.armies_counter_label.color = (0, 10, 1, 1)
         #       color = (Red, Green, Blue, Alpha)
 
@@ -197,71 +195,71 @@ class Country(Layout, Image):
         if Country.MODE == 'cc':  # User's turn - (cc = Choose Country)
 
             # if Country.CHOSE_COUNTRY is None:
-                # Before a country has chosen
+            # Before a country has chosen
 
-                if self.btn.control == 2 and not self in Country.OCCUPIED_COUNTRIES:
-                    # User's country which can attack this turn
+            if self.btn.control == 2 and self not in Country.OCCUPIED_COUNTRIES:
+                # User's country which can attack this turn
 
-                    # Change the side countries source to be targets
-                    for country in self.side_countries:
-                        if country.btn.control == 1:
-                            country.btn.source = 'x_red.png'
-                        elif country.btn.control == 0:
-                            country.btn.source = 'x_green.png'
-                        elif country.btn.control == 2:
-                            country.btn.source = 'arrow_blue.png'
+                # Change the side countries source to be targets
+                for country in self.side_countries:
+                    if country.btn.control == 1:
+                        country.btn.source = 'x_red.png'
+                    elif country.btn.control == 0:
+                        country.btn.source = 'x_green.png'
+                    elif country.btn.control == 2:
+                        country.btn.source = 'arrow_blue.png'
 
-                    self.change_button_size_on_the_layout(True)
+                self.change_button_size_on_the_layout(True)
 
-                    Country.CHOSE_COUNTRY = self
+                Country.CHOSE_COUNTRY = self
 
-                    Country.SIGN.pos = (self.button_pos[0]-20, self.button_pos[1]-40)
-                    self.add_widget(Country.SIGN)
+                Country.SIGN.pos = (self.button_pos[0] - 20, self.button_pos[1] - 40)
+                self.add_widget(Country.SIGN)
 
-                    # Change class NOW_SIDE_COUNTRIES to this country's side countries
-                    Country.NOW_SIDE_COUNTRIES = self.side_countries
-                    Country.TARGET_COUNTRY = None
-                    Country.MODE = 'csc'
+                # Change class NOW_SIDE_COUNTRIES to this country's side countries
+                Country.NOW_SIDE_COUNTRIES = self.side_countries
+                Country.TARGET_COUNTRY = None
+                Country.MODE = 'csc'
 
         elif Country.MODE == 'csc':  # A country was chosen
-                if self is Country.CHOSE_COUNTRY:  # This country is the user's chosen country
+            if self is Country.CHOSE_COUNTRY:  # This country is the user's chosen country
 
-                    # Return all the side countries to the start
-                    self.change_button_size_on_the_layout(to_big=False)
-                    for country in self.side_countries:
-                        country.change_button_size_on_the_layout(False)
+                # Return all the side countries to the start
+                self.change_button_size_on_the_layout(to_big=False)
+                for country in self.side_countries:
+                    country.change_button_size_on_the_layout(False)
 
-                        # If the menu is visible, remove it
-                        if country.armies_to_pass is not None:
-                            country.remove_widget(country.armies_to_pass)
+                    # If the menu is visible, remove it
+                    if country.armies_to_pass is not None:
+                        country.remove_widget(country.armies_to_pass)
 
-                        if country.btn.control == 1:
-                            country.btn.source = 'red.png'
-                        elif country.btn.control == 0:
-                            country.btn.source = 'green.png'
-                        elif country.btn.control == 2:
-                            country.btn.source = 'blue.png'
+                    if country.btn.control == 1:
+                        country.btn.source = 'red.png'
+                    elif country.btn.control == 0:
+                        country.btn.source = 'green.png'
+                    elif country.btn.control == 2:
+                        country.btn.source = 'blue.png'
 
-                    Country.NOW_SIDE_COUNTRIES = []
-                    Country.CHOSE_COUNTRY = None
-                    self.remove_widget(Country.SIGN)
-                    Country.MODE = 'cc'
+                Country.NOW_SIDE_COUNTRIES = []
+                Country.CHOSE_COUNTRY = None
+                self.remove_widget(Country.SIGN)
+                Country.MODE = 'cc'
 
-                else:  # There is a chosen country but it's not this country
-                    if self in Country.NOW_SIDE_COUNTRIES:  # A side country
-                        if self is Country.TARGET_COUNTRY:
-                            self.change_button_size_on_the_layout(False)
-                            Country.TARGET_COUNTRY = None
-                            if Country.CHOSE_COUNTRY.armies_counter > 0:
-                                self.remove_widget(self.armies_to_pass)
+            else:  # There is a chosen country but it's not this country
+                if self in Country.NOW_SIDE_COUNTRIES:  # A side country
+                    if self is Country.TARGET_COUNTRY:
+                        self.change_button_size_on_the_layout(False)
+                        Country.TARGET_COUNTRY = None
+                        if Country.CHOSE_COUNTRY.armies_counter > 0:
+                            self.remove_widget(self.armies_to_pass)
 
-                        elif not Country.TARGET_COUNTRY:
-                            self.change_button_size_on_the_layout(True)
-                            Country.TARGET_COUNTRY = self
-                            self.add_armies_numbers_gridlayout()
+                    elif not Country.TARGET_COUNTRY:
+                        self.change_button_size_on_the_layout(True)
+                        Country.TARGET_COUNTRY = self
+                        self.add_armies_numbers_gridlayout()
 
         elif Country.MODE == 'aa' and self.control == 2:
-            self.refresh_armies_counter(self.armies_counter+1)
+            self.refresh_armies_counter(self.armies_counter + 1)
             Game.refresh_addition_armies(Game.ADDITION_ARMIES - 1)
 
     def add_armies_numbers_gridlayout(self):
@@ -274,13 +272,13 @@ class Country(Layout, Image):
             return
 
         self.armies_to_pass = GridLayout(cols=Country.CHOSE_COUNTRY.armies_counter + 1,
-                                    size=(23 * Country.CHOSE_COUNTRY.armies_counter, 20),
-                                    pos=(self.button_pos[0] + 20, self.button_pos[1]))
+                                         size=(23 * Country.CHOSE_COUNTRY.armies_counter, 20),
+                                         pos=(self.button_pos[0] + 20, self.button_pos[1]))
 
         for num in xrange(Country.CHOSE_COUNTRY.armies_counter + 1):
-            numButton = Button(text=str(num))
-            numButton.bind(on_press=self.choose_armies_number)
-            self.armies_to_pass.add_widget(numButton)
+            num_button = Button(text=str(num))
+            num_button.bind(on_press=self.choose_armies_number)
+            self.armies_to_pass.add_widget(num_button)
         self.add_widget(self.armies_to_pass)
 
     def change_control(self, new_control):
@@ -324,8 +322,45 @@ class Country(Layout, Image):
             self.add_armies_numbers_gridlayout()
 
 
-class Game(Layout, Image):
+def ext_country(country):
+    """
+    Helping function to 'ext_countries_in_bloc'
+    :param country: Country in bloc.
+    :return: If the country has a side country with a different control.
+    """
+    for side_country in country.side_countries:
+        if side_country.control != country.control:
+            return True
+    return False
 
+
+def ext_countries_in_bloc(bloc):
+    """
+
+    :param bloc: List of Countries.
+    :return: All the ext-countries* in the bloc.
+                * ext-countries => country in the bloc has a side country with a different control.
+    """
+    the_ext_counries = list()
+    for country in bloc:
+        if ext_country(country):
+            the_ext_counries.append(country)
+    return the_ext_counries
+
+
+def sum_armies_in_bloc(bloc):
+    """
+
+    :param bloc: List of countries... BLOC .
+    :return: The sum of the armies in the bloc.
+    """
+    sum_armies = 0
+    for country in bloc:
+        sum_armies += country.armies_counter
+    return sum_armies
+
+
+class Game(Layout, Image):
     ARMIES_LABEL = Label(text='0',
                          size=(100, 100),
                          pos=(1100, 770),
@@ -334,7 +369,7 @@ class Game(Layout, Image):
                          color=(0, 10, 1, 1))
     ADDITION_ARMIES = 5
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         Layout.__init__(self)
         Image.__init__(self)
         self.source = 'world_map_draw_the_limit.png'
@@ -592,7 +627,8 @@ class Game(Layout, Image):
 
         source_country.refresh_armies_counter(source_country.armies_counter + armies_number)
 
-        print "Country: {} passed {} armies to country {}".format(self.country_name(source_country).upper(), armies_number, self.country_name(des_country).upper())
+        print "Country: {} passed {} armies to country {}".format(self.country_name(source_country).upper(),
+                                                                  armies_number, self.country_name(des_country).upper())
 
     def country_name(self, country):
         """
@@ -603,25 +639,6 @@ class Game(Layout, Image):
         for name, c in self.countries_dic.items():
             if country == c:
                 return name
-
-    def computer_turn(self):
-        """
-        Handle the computer turn - The AI
-        :return:
-        """
-        Game.ARMIES_LABEL.text = "Computer Turn"
-
-
-        print "Checkkkk", self.sum_armies_in_bloc(self.country_bloc(root_country=self.countries_dic['middle_east_israel']))
-
-        # TODO: Use the ai-functions here !
-
-        # Computer finished his turn.
-        print "Computer finishes his turn,\nnow user turn"
-        Country.OCCUPIED_COUNTRIES = []
-        Country.MODE = 'aa'
-        Game.ARMIES_LABEL.text = '5'
-        Game.ADDITION_ARMIES = 5
 
     def country_bloc(self, root_country, past_countries=None):
         """
@@ -647,8 +664,6 @@ class Game(Layout, Image):
 
     def all_blocs_in_game(self):
         """
-        :param past_countries: The countries which is already in the bloc.
-        :param past_block: The blocs which already in the list.
         :return: List contains blocs*.
                 bloc* - list of countries with the same control.
         """
@@ -672,30 +687,6 @@ class Game(Layout, Image):
                 comp_blocs.append(bloc)
         return comp_blocs
 
-    def ext_country(self, country):
-        """
-        Helping function to 'ext_countries_in_bloc'
-        :param country: Country in bloc.
-        :return: If the country has a side country with a different control.
-        """
-        for side_country in country.side_countries:
-            if side_country.control != country.control:
-                return True
-        return False
-
-    def ext_countries_in_bloc(self, bloc):
-        """
-
-        :param bloc: List of Countries.
-        :return: All the ext-countries* in the bloc.
-                    * ext-countries => country in the bloc has a side country with a different control.
-        """
-        the_ext_counries = list()
-        for country in bloc:
-            if self.ext_country(country):
-                the_ext_counries .append(country)
-        return the_ext_counries
-
     def side_blocs(self, bloc):
         """
 
@@ -703,25 +694,31 @@ class Game(Layout, Image):
         :return: All the blocs near the giving bloc.
         """
         the_side_blocs = list()
-        for ext_country in self.ext_countries_in_bloc(bloc=bloc):  # All the ext-countries in the bloc.
+        for ext_country in ext_countries_in_bloc(bloc=bloc):  # All the ext-countries in the bloc.
             for side_country in ext_country.side_countries:  # All the side countries to the country.
                 if side_country.control != ext_country.control:  # The side country not in the bloc.
                     if self.country_bloc(root_country=side_country) not in the_side_blocs:  # if the bloc not exist yet.
                         the_side_blocs.append(self.country_bloc(root_country=side_country))
         return the_side_blocs
 
-    def sum_armies_in_bloc(self, bloc):
+    def computer_turn(self):
         """
-
-        :param bloc: List of countries... BLOC .
-        :return: The sum of the armies in the bloc.
+        Handle the computer turn - The AI
+        :return:
         """
-        sum_armies = 0
-        for country in bloc:
-            sum_armies += country.armies_counter
-        return sum_armies
+        Game.ARMIES_LABEL.text = "Computer Turn"
 
+        print "Checkkkk", sum_armies_in_bloc(
+            self.country_bloc(root_country=self.countries_dic['middle_east_israel']))
 
+        # TODO: Use the ai-functions here !
+
+        # Computer finished his turn.
+        print "Computer finishes his turn,\nnow user turn"
+        Country.OCCUPIED_COUNTRIES = []
+        Country.MODE = 'aa'
+        Game.ARMIES_LABEL.text = '5'
+        Game.ADDITION_ARMIES = 5
 
     # TODO : Build The AI!!
 
@@ -731,29 +728,25 @@ class Game(Layout, Image):
         # TODO (1): Create this function !
         pass
 
-
-
-
+    
 
     # Not relevant now.
     def ai_divide_armies_between_blocs(self, armies_to_divide=5):
         for comp_bloc in self.computer_blocs():
             for side_bloc in self.side_blocs(bloc=comp_bloc):
-                comp_sum_armis = abs(self.sum_armies_in_bloc(bloc=comp_bloc))
-                side_sum_armis = abs(self.sum_armies_in_bloc(bloc=side_bloc))
+                comp_sum_armis = abs(sum_armies_in_bloc(bloc=comp_bloc))
+                side_sum_armis = abs(sum_armies_in_bloc(bloc=side_bloc))
 
                 if comp_sum_armis > side_sum_armis:
                     pass
                 else:
-                    delta = abs(comp_sum_armis - side_sum_armis)+1
+                    delta = abs(comp_sum_armis - side_sum_armis) + 1
                     if delta < armies_to_divide:
                         comp_bloc[0].add_armies_to_country(armies_to_add=delta)
 
     def ai_pass_armies(self):
         for bloc in self.computer_blocs():
             pass
-
-
 
 
 class WarGameApp(App):
