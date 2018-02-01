@@ -17,6 +17,11 @@ from kivy.graphics.texture import Texture
 from kivy.utils import escape_markup
 import time
 
+from itertools import permutations
+
+
+
+
 
 class ButtonCountry(ButtonBehavior, Image):
     def __init__(self, control, armies_number=0, **kwargs):
@@ -399,7 +404,7 @@ class Game(Layout, Image):
         self.countries_dic['china'] = Country(0, set([]), 2, (868, 583))
         self.countries_dic['mongolia'] = Country(0, set([]), 2, (860, 640))
         self.countries_dic['kazakhstan'] = Country(0, set([]), 2, (750, 650))
-        self.countries_dic['mexico'] = Country(0, set([]), 2, (151, 520))
+        self.countries_dic['mexico'] = Country(1, set([]), 2, (151, 520))
         self.countries_dic['south_america_n'] = Country(0, set([]), 2, (242, 384))
         self.countries_dic['south_america_s'] = Country(0, set([]), 2, (304, 103))
         self.countries_dic['brazil'] = Country(0, set([]), 2, (321, 281))
@@ -711,6 +716,8 @@ class Game(Layout, Image):
         print "Checkkkk", sum_armies_in_bloc(
             self.country_bloc(root_country=self.countries_dic['middle_east_israel']))
 
+        self.ai_divide_armies_between_blocs()
+
         # TODO: Use the ai-functions here !
 
         # Computer finished his turn.
@@ -723,15 +730,63 @@ class Game(Layout, Image):
     # TODO : Build The AI!!
 
 
+
+    def optins_to_divide(self, armies_to_divide = 5):
+        if len(self.computer_blocs()) == 1:
+            return [(armies_to_divide)]
+
+        temp = list()
+        for x in range(armies_to_divide + 1):
+            temp.append(x)
+
+        # Get all permutations of length 2
+        # and length 2
+        perm = permutations(temp, len(self.computer_blocs()))
+
+        perm = filter(lambda x: sum(x) == 5, perm)
+        ''' for i in list(perm):
+            print "pppp", i'''
+
+
     # AI
     def next_moves_list(self):
+
+
+
         # TODO (1): Create this function !
         pass
 
-    
 
-    # Not relevant now.
+
     def ai_divide_armies_between_blocs(self, armies_to_divide=5):
+
+
+        all_score = list()
+        current_option = list()
+
+        computer_blocs = self.computer_blocs()
+        for option in self.optins_to_divide():
+            score = 0
+            # TODO - SCORE - Give more score to the ability to conquer more than one country in one tiurn !
+            for i in len(option):
+                for side_bloc in self.side_blocs(computer_blocs[i]):
+                    if sum_armies_in_bloc(side_bloc) < sum_armies_in_bloc(computer_blocs[i]) + option[i]:
+                        score += 10
+                    elif sum_armies_in_bloc(side_bloc) > sum_armies_in_bloc(computer_blocs[i]) + option[i]:
+                        score -= 10
+
+
+        # TODO - Divide the armies between the correct blocs.
+
+
+
+        pass
+
+
+
+
+
+
         for comp_bloc in self.computer_blocs():
             for side_bloc in self.side_blocs(bloc=comp_bloc):
                 comp_sum_armis = abs(sum_armies_in_bloc(bloc=comp_bloc))
