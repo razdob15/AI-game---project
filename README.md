@@ -1,0 +1,6 @@
+# AI-game---project
+The world war game
+Hi,
+This is an AI game, its name is known as RISK. However, I changed the rules a little bit.
+...
+...
