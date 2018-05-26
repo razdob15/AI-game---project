@@ -1,7 +1,7 @@
 add_ins: After you've added armies to your countries you can pass armies from your country to another country which is near to you one. You can pass armies in two different cases:
-short_cut_numbers: SHORTCUT: You can use your keyboard's numbers to choose how many armies to pass.
-short_cut_space: SHORTCUT: You can use space btn to un-choose the last country you clicked on.
-at_beginning_add: At the beginning of every turn, beside the first one, you choose how to divide 5 armies between your countries
+shortcut_numbers: SHORTCUT: You can use your keyboard's numbers to choose how many armies to pass.
+shortcut_space: SHORTCUT: You can use space btn to un-choose the last country you clicked on.
+at_beginning_add: At the beginning of every turn, you choose how to divide 5 armies between your countries
 where_armies_label: The number of the armies you have to divide is shown in the right-top corner.
 look_at_armies_label: The number of the armies you have to divide is shown in the right-up corner.
 who_win: The winner is who conquered all the other player's countries.
@@ -12,7 +12,7 @@ inst_aa: Choose how to divide your new armies (see above) between your countries
 inst_ct: Computer's turn
 inst_pa: Choose how many armies you want to pass to this country from the previous country
 
-tot_p4_main: After you've added armies to your countries you can pass armies from your country to another country which is near to you one. You can pass armies in two different cases:
+tot_p4_main: After you've added armies to your countries you can pass armies from your country to an~other country which is near to you one. You can pass armies in two different cases:
 
 warn_not_user_country: This country doesn't belong to you.
 warn_not_user_country_yet: You've just conquered this country. it will be yours after you'll finish your turn.
