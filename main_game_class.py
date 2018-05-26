@@ -1,49 +1,26 @@
-# Raz's Project 2017/2018
-from kivy.app import App
-from kivy.lang import Builder
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.graphics import Color, Rectangle
-from kivy.uix.popup import Popup
-from kivy.properties import StringProperty
+# Raz's Project 2017-2018
 from random import randrange
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.image import Image
-from kivy.uix.widget import Widget
+
 from kivy.app import App
-from kivy.uix.layout import Layout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.scatter import Scatter
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
+from kivy.core.window import Window
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.button import Button
-from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
-from kivy.animation import Animation
-from kivy.graphics.texture import Texture
-from kivy.utils import escape_markup
-import time
-import copy
-
-from itertools import permutations
-import itertools
-import math
-from kivy.core.window import Window
-from kivy.clock import Clock
-from functools import partial
-
-# TODO(!): Finish INSTRUCTIONS and then -> ANIMATION ! !
-# TODO(2): Ask the user about the colors of the players. Give option to RANDOM -> Run all the colors in 3 squars some minutes... :-)
-
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
+from kivy.uix.label import Label
+from kivy.uix.layout import Layout
+from kivy.uix.popup import Popup
+from kivy.uix.textinput import TextInput
 
 """
 Important Concepts:
-    Country:
+    In Country:
         - Side Country -> Relative expression. Means to two countries that are adjacent to each other, "Neighbor Countries".
         - Bloc -> List of countries that are adjacent to each other and have a common control.
         - Ext Country -> A country in a bloc which has a side country with a different control.
 
-    Game:
+    In Game:
         - Mode -> shortcut for describe the current game's situation for the user:
                     'cc' - for Choose Country -> The user need to choose a country belongs to him.
                     'csc' - for Choose Side Country -> the user need to choose a country
@@ -53,7 +30,7 @@ Important Concepts:
                     'pa' - for Pass Armies -> The user had already chose 2 countries (the first one must be one of his countries)
                                                 and now hw need to pass armies from the first one to the other.
 
-    Computer Turn:
+    In Computer Turn:
         - Easy Kill / Easy Killing -> When the computer can attack a user's bloc contains only one country.
 
     *Note: Those concepts are displayed with asterisk(*) or by CAPITAL LETTERS.
@@ -116,9 +93,6 @@ class ButtonCountry(ButtonBehavior, Image):
 
 
 class Country(Layout):
-    # The sign which marks the CHOSE_COUNTRY on the map.
-    SIGN = Label(text='^', color=(1, 0, 0, 1), markup=True, size=(50, 50), font_size=30)
-
     # The country which is chosen by the user.
     CHOSE_COUNTRY = None
 
@@ -127,6 +101,9 @@ class Country(Layout):
 
     # The countries that the user conquered in the last turn
     OCCUPIED_COUNTRIES = []
+
+    # The sign which marks the CHOSE_COUNTRY on the map.
+    SIGN = Label(text='^', color=(1, 0, 0, 1), markup=True, size=(50, 50), font_size=30)
 
     def __init__(self, control, side_countries, continent, pos, armies_counter=0, is_tot=False, **kwargs):
         """
@@ -149,7 +126,6 @@ class Country(Layout):
 
         # Layout attributes
         self.size = (0, 0)
-        # self.size_hint = (3, 3)  TODO: Maybe not important
 
         # Country attributes
         self.control = control
@@ -205,14 +181,13 @@ class Country(Layout):
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
         self._keyboard = None
 
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+    def _on_keyboard_down(self, keyboard, key_code, text, modifiers):
         # Called when the user click on the keyboard.
 
-        if keycode[0] == 13 or keycode[0] == 271:  # Enter
+        if key_code[0] == 13 or key_code[0] == 271:  # Enter
             pass
 
-        if keycode[0] == 32:  # Space
-            # Closes the last country that opened.
+        if key_code[0] == 32:  # Space - Closes the last country that opened.
 
             if Country.TARGET_COUNTRY is not None:
                 Country.TARGET_COUNTRY.country_click(555)
@@ -224,10 +199,9 @@ class Country(Layout):
                 print 'Close CHOSE_COUNTRY'
                 return
 
-        if self.armies_to_pass:
-            # Choose how many armies to pass --> keycode[0] need to be a number.
+        if self.armies_to_pass:  # Choose how many armies to pass --> keycode[0] need to be a number.
 
-            num = keycode[0] - 48
+            num = key_code[0] - 48
             if 208 < num < 218:
                 num -= 208
             print 'num = ', num
@@ -447,32 +421,31 @@ class Country(Layout):
 
         if self.control != 2:
             if not Country.CHOSE_COUNTRY:
-                Game.NOT_USER_COUNTRY_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country'])
+                Game.INPUT_WARNING_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country'])
                 return
             if self not in Country.CHOSE_COUNTRY.side_countries:
-                Game.NOT_USER_COUNTRY_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country'])
+                Game.INPUT_WARNING_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country'])
                 return
         if self in Country.OCCUPIED_COUNTRIES:
             if not Country.CHOSE_COUNTRY:
-                Game.NOT_USER_COUNTRY_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country_yet'])
+                Game.INPUT_WARNING_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country_yet'])
                 return
             if self not in Country.CHOSE_COUNTRY.side_countries:
-                Game.NOT_USER_COUNTRY_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country_yet'])
+                Game.INPUT_WARNING_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country_yet'])
                 return
 
-        Game.NO_ARMIES_IN_CHOSE_COUNTRY_LABEL.text = ''
-        Game.NOT_USER_COUNTRY_LABEL.text = ''
-        Game.NOT_USER_COUNTRY_LABEL.text = ''
+        Game.INPUT_WARNING_LABEL.text = ''
+        Game.INPUT_WARNING_LABEL.text = ''
 
         if Game.MODE == 'cc':  # User's turn - (cc = Choose Country)
 
             if self in Country.OCCUPIED_COUNTRIES:
                 # User cannot click on this country in this turn. Only in the next turn.
                 print "Not user's country YET"
-                Game.NOT_USER_COUNTRY_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country_yet'])
+                Game.INPUT_WARNING_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country_yet'])
                 return
             else:
-                Game.NOT_USER_COUNTRY_LABEL.text = ""
+                Game.INPUT_WARNING_LABEL.text = ""
 
             if self.btn.control == 2:
                 # Create new CHOSE_COUNTRY
@@ -481,7 +454,7 @@ class Country(Layout):
                 return
 
             else:
-                Game.NOT_USER_COUNTRY_LABEL.text = Game.NOT_USER_COUNTRY_TEXT
+                Game.INPUT_WARNING_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_not_user_country'])
 
         elif Game.MODE == 'pa':
             if self is Country.CHOSE_COUNTRY:
@@ -514,7 +487,8 @@ class Country(Layout):
 
                     if not Country.CHOSE_COUNTRY.armies_counter:
                         print 'No armies to pass'
-                        Game.NOT_USER_COUNTRY_LABEL.text = add_enter_in_instruction(Game.RES_DICT['warn_no_armies_in_chose_country'])
+                        Game.INPUT_WARNING_LABEL.text = add_enter_in_instruction(
+                            Game.RES_DICT['warn_no_armies_in_chose_country'])
                         return
 
                     else:
@@ -535,7 +509,7 @@ class Country(Layout):
                 self.refresh_armies_counter(self.armies_counter + 1)
                 Game.refresh_addition_armies_label(Game.ADDITION_ARMIES - 1)
             else:
-                Game.NOT_USER_COUNTRY_LABEL.text = Game.RES_DICT['warn_not_user_country']
+                Game.INPUT_WARNING_LABEL.text = Game.RES_DICT['warn_not_user_country']
 
     def armies_gridlayout_changer(self):
         """
@@ -627,18 +601,14 @@ class Country(Layout):
             Country.TARGET_COUNTRY.country_click(553)
             Country.CHOSE_COUNTRY.country_click(552)
 
+    def is_ext_country(self):
+        """*Helping function to 'ext_countries_in_bloc'.
+            Returns: Boolean ->  Whether the country has a side country with a different control."""
 
-def ext_country(country):
-    """
-    *Helping function to 'ext_countries_in_bloc'.
-
-    :param country: Country in bloc.
-    :return: whether the country has a side country with a different control.
-    """
-    for side_country in country.side_countries:
-        if side_country.control != country.control:
-            return True
-    return False
+        for side_country in self.side_countries:
+            if side_country.control != self.control:
+                return True
+        return False
 
 
 def ext_countries_in_bloc(bloc):
@@ -649,7 +619,7 @@ def ext_countries_in_bloc(bloc):
     """
     the_ext_countries = list()
     for country in bloc:
-        if ext_country(country):
+        if country.is_ext_country():
             the_ext_countries.append(country)
     return the_ext_countries
 
@@ -679,70 +649,70 @@ def bloc_equal_bloc(bloc1, bloc2):
     return True
 
 
-def common_countries_between_blocs(bloc1, bloc2):
-    """
-
-    :param bloc1: *Bloc
-    :param bloc2: *Bloc
-    :return: List contains all the commons countries in the two blocs.
-    """
-    commons = list()
-    for country1 in bloc1:
-        if country1 in bloc2:
-            commons.append(country1)
-    return commons
-
-
-# TODO: Unused Function
-'''
-def copy_all_blocs(all_blocs):
-    the_copy = list()
-    for bloc in all_blocs:
-        bloc_copy = list()
-        for country in bloc:
-            bloc_copy.append(Country(country.control, country.side_countries, country.continent, country.pos,
-                                     armies_counter=country.armies_counter))
-        the_copy.append(bloc_copy)
-    return the_copy
-'''
-
-
 def create_start_countries_dict():
     """
     This function returns a dictionary contains all the countries in the game.
         keys -> name.
         values -> Country object.
+    In addition, this function worked in a random way.
     :return: countries_dic --> Dictionary
     """
+    com_list = list()
+    user_list = list()
+    com_list.append(randrange(27))
+    com2 = randrange(27)
+    while com2 in com_list:
+        com2 = (com2 + 1) % 27
+    com_list.append(com2)
+    user1 = randrange(27)
+    while user1 in com_list:
+        user1 = (user1 + 1) % 27
+    user_list.append(user1)
+    user2 = randrange(27)
+    while user2 in com_list or user2 in user_list:
+        user2 = (user2 + 1) % 27
+    user_list.append(user2)
+
+    i = 0
+
     countries_dic = dict()
-    countries_dic['egypt'] = Country(0, set([]), 1, (620, 495))
+    countries_dic['egypt'] = Country(0, set([]), 1, (620, 510))
     countries_dic['usa_east'] = Country(0, set([]), 5, (245, 610))
-    countries_dic['usa_west'] = Country(0, set([]), 5, (124, 623))
-    countries_dic['canada'] = Country(1, set([]), 5, (228, 770))
-    countries_dic['australia'] = Country(2, set([]), 1, (993, 168))
-    countries_dic['russia_east'] = Country(1, set([]), 2, (689, 708))
+    countries_dic['usa_west'] = Country(0, set([]), 5, (135, 623))
+    countries_dic['canada'] = Country(0, set([]), 5, (228, 770))
+    countries_dic['australia'] = Country(0, set([]), 1, (993, 168))
+    countries_dic['russia_east'] = Country(0, set([]), 2, (689, 708))
     countries_dic['russia_west'] = Country(0, set([]), 2, (916, 777))
-    countries_dic['france'] = Country(0, set([]), 3, (540, 640))
-    countries_dic['spain'] = Country(0, set([]), 3, (514, 596))
+    countries_dic['france'] = Country(0, set([]), 3, (545, 650))
+    countries_dic['spain'] = Country(0, set([]), 3, (514, 605))
     countries_dic['india'] = Country(0, set([]), 2, (799, 481))
     countries_dic['middle_east_israel'] = Country(0, set([]), 2, (655, 543))
     countries_dic['iran'] = Country(0, set([]), 2, (710, 550))
-    countries_dic['europe_east'] = Country(0, set([]), 2, (614, 679))
+    countries_dic['europe_east'] = Country(0, set([]), 2, (600, 685))
     countries_dic['china'] = Country(0, set([]), 2, (868, 583))
-    countries_dic['mongolia'] = Country(0, set([]), 2, (860, 640))
+    countries_dic['mongolia'] = Country(0, set([]), 2, (860, 650))
     countries_dic['kazakhstan'] = Country(0, set([]), 2, (750, 650))
     countries_dic['mexico'] = Country(0, set([]), 2, (151, 520))
     countries_dic['south_america_n'] = Country(0, set([]), 2, (242, 384))
-    countries_dic['south_america_s'] = Country(2, set([]), 2, (304, 103))
+    countries_dic['south_america_s'] = Country(0, set([]), 2, (304, 103))
     countries_dic['brazil'] = Country(0, set([]), 2, (321, 281))
-    countries_dic['denmark'] = Country(0, set([]), 2, (613, 779))
+    countries_dic['denmark'] = Country(0, set([]), 2, (630, 770))
     countries_dic['algeria'] = Country(0, set([]), 2, (536, 509))
     countries_dic['congo'] = Country(0, set([]), 2, (602, 330))
-    countries_dic['madagascar'] = Country(0, set([]), 2, (690, 228))
-    countries_dic['south_africa'] = Country(0, set([]), 2, (605, 213))
+    countries_dic['madagascar'] = Country(0, set([]), 2, (682, 228))
+    countries_dic['south_africa'] = Country(0, set([]), 2, (575, 250))
     countries_dic['greenland'] = Country(0, set([]), 2, (487, 846))
-    countries_dic['chad'] = Country(0, set([]), 2, (585, 436))
-    countries_dic['indonesia'] = Country(0, set([]), 2, (937, 342))
+    countries_dic['chad'] = Country(0, set([]), 2, (579, 400))
+    countries_dic['indonesia'] = Country(0, set([]), 2, (937, 352))
+
+    for c in countries_dic.values():
+        if i in user_list:
+            c.change_control(2)
+            c.refresh_armies_counter(5)
+        elif i in com_list:
+            c.change_control(1)
+            c.refresh_armies_counter(-5)
+        i += 1
 
     countries_dic['usa_east'].side_countries.add(countries_dic['usa_west'])
     countries_dic['usa_west'].side_countries.add(countries_dic['usa_east'])
@@ -925,13 +895,6 @@ def create_res_dict():
 class Game(Layout, Image):
     RES_DICT = create_res_dict()
 
-    # INSTRUCTIONS_MODE = dict()
-    # INSTRUCTIONS_MODE['cc'] = 'Instructions:\n' + add_enter_in_instruction("Choose a country belongs to you")
-    # INSTRUCTIONS_MODE['csc'] = 'Instructions:\n' + add_enter_in_instruction("Choose a country near the country you've just chose")
-    # INSTRUCTIONS_MODE['aa'] = 'Instructions:\n' + add_enter_in_instruction("Choose how to divide your new armies (see above) between your countries")
-    # INSTRUCTIONS_MODE['ct'] = 'Instructions:\n' + add_enter_in_instruction("Computer's turn")
-    # INSTRUCTIONS_MODE['pa'] = 'Instructions:\n' + add_enter_in_instruction("Choose how many armies you want to pass to this country from the previous country") # Pass Armies
-
     INSTRUCTIONS_LABEL = Label(text='Instructions:\nChoose a country belongs to you',
                                bold=True,
                                font_size=20,
@@ -939,25 +902,14 @@ class Game(Layout, Image):
                                halign="center",
                                valign="middle",
                                color=(0, 0, 0, 1))
-    NO_ARMIES_IN_CHOSE_COUNTRY_TEXT = add_enter_in_instruction(
-        "You don't have armies to pass from the country you chose before. close it to continue.")
-    NO_ARMIES_IN_CHOSE_COUNTRY_LABEL = Label(text="",
-                                             text_size=(None, None),
-                                             font_size=20,
-                                             pos=(1060, 550),
-                                             size_hint_y=None,
-                                             halign="center",
-                                             valign="middle",
-                                             color=(214.0/256, 111.0/256, 111.0/256, 1))
-    NOT_USER_COUNTRY_TEXT = add_enter_in_instruction("This country doesn't belongs to you.")
-    NOT_USER_COUNTRY_LABEL = Label(text="",
-                                   text_size=(None, None),
-                                   font_size=20,
-                                   pos=(1080, 600),
-                                   size_hint_y=None,
-                                   halign="center",
-                                   valign="middle",
-                                   color=(0, 0, 0, 1))
+    INPUT_WARNING_LABEL = Label(text="",
+                                text_size=(None, None),
+                                font_size=20,
+                                pos=(1080, 600),
+                                size_hint_y=None,
+                                halign="center",
+                                valign="middle",
+                                color=(0, 0, 0, 1))
     ARMIES_LABEL = Label(text='5',
                          size=(100, 100),
                          pos=(1100, 770),
@@ -991,35 +943,38 @@ class Game(Layout, Image):
         self.source = 'world_map_draw_the_limit.png'
 
         self.finish_turn_btn = Button(text='Start Tutorial',
-                                      size=(180, 30),
-                                      pos=(100, 10),
+                                      size=(220, 50),
+                                      pos=(500, 300),
                                       halign="center",
+                                      bold=True,
                                       markup=True,
-                                      font_size=25)
-        self.play_btn = Button(text='PLAY !',
-                               size=(150, 30),
-                               pos=(500, 500),
-                               halign="center",
-                               markup=True,
-                               font_size=25)
+                                      font_size=32,
+                                      background_color=(0, 229.0 / 256, 214.0 / 256, 1))
+
+        self.play_ib = ImageButton(source='play_sw.png',
+                                   click_fun=self.play_btn_click, pos=(500, 400), size=(220, 220))
         self.hide_instructions = Button(text='Hide Instructions',
                                         bold=True,
                                         radius=[50, ],
                                         size=(170, 30),
-                                        pos=(1050, 460),
+                                        pos=(1050, 480),
                                         halign="center",
-                                        border=(30, 30, 30, 30),
                                         background_normal='blue.png',
+                                        background_color=(138.0 / 256, 156.0 / 256, 47.0 / 256, .8),
                                         markup=True,
                                         font_size=20)
         self.hide_instructions.bind(on_press=self.hide_instructions_click)
         self.info_btn = ImageButton('help_icon.png', self.info_click, size=(50, 50), pos=(30, 820))
+        self.tutorial_btn = Button(size=(100, 30), pos=(30, 750), text='TUTORIAL',
+                                   markup=True, bold=True, font_size=20,
+                                   background_color=(0, 229.0 / 256, 214.0 / 256, .8))
+        self.tutorial_btn.bind(on_press=self.open_tutorial)
         self.finish_turn_btn.bind(on_press=self.click_finish_turn)
         self.add_widget(self.finish_turn_btn)
-        self.play_btn.bind(on_press=self.play_btn_click)
-        self.add_widget(self.play_btn)
-        self.add_widget(Game.NO_ARMIES_IN_CHOSE_COUNTRY_LABEL)
-        self.add_widget(Game.NOT_USER_COUNTRY_LABEL)
+        # self.play_btn.bind(on_press=self.play_btn_click)
+        # self.add_widget(self.play_btn)
+        self.add_widget(self.play_ib)
+        self.add_widget(Game.INPUT_WARNING_LABEL)
 
         self.countries_dic = countries_dic
 
@@ -1029,68 +984,31 @@ class Game(Layout, Image):
         self.popup.background = 'wall.jpg'
         self.popup.bind(on_dismiss=self.dismiss_popup)
 
-        # Countries and their poses
-        """
-        '''
-        self.add_widget(Country(2, [], 1, (620, 495)))  # Egypt
-        self.add_widget(Country(1, [], 5, (245, 610)))  # Usa East
-        self.add_widget(Country(2, [], 5, (124, 623)))  # USA West
-        self.add_widget(Country(0, [], 5, (228, 770)))  # Canada
-        self.add_widget(Country(1, [], 1, (993, 168)))  # Australia
-        self.add_widget(Country(1, [], 2, (689, 708)))  # Russia East
-        self.add_widget(Country(2, [], 2, (916, 777)))  # Russia West
-        self.add_widget(Country(0, [], 3, (540, 640)))  # France
-        self.add_widget(Country(2, [], 3, (514, 596)))  # Spain
-        self.add_widget(Country(0, [], 2, (799, 481)))  # India
-        self.add_widget(Country(1, [], 2, (655, 543)))  # Middle East (Israel Area)
-        self.add_widget(Country(2, [], 1, (600, 670)))  # Europe East
-        self.add_widget(Country(0, [], 2, (868, 583)))  # China
-        self.add_widget(Country(0, [], 5, (151, 520)))  # Mexico
-        self.add_widget(Country(1, [], 5, (242, 384)))  # South America (N)
-        self.add_widget(Country(1, [], 5, (304, 103)))  # South America (S)
-        self.add_widget(Country(2, [], 5, (321, 281)))  # Brazil
-        self.add_widget(Country(2, [], 3, (613, 779)))  # Denmark
-        self.add_widget(Country(1, [], 1, (536, 509)))  # Algeria
-        self.add_widget(Country(0, [], 1, (602, 330)))  # Congo
-        self.add_widget(Country(0, [], 1, (690, 228)))  # Madagascar
-        self.add_widget(Country(0, [], 1, (605, 213)))  # South Africa
-        self.add_widget(Country(2, [], 5, (487, 846)))  # Greenland
-        self.add_widget(Country(1, [], 1, (585, 436)))  # Chad
-        self.add_widget(Country(2, [], 0, (937, 342)))  # Indonesia
-        '''
-
-        # 620, 495 - Egypt              V
-        # 245, 610 - USA East           V
-        # 124, 623 - USA West           V
-        # 228, 770 - Canada             V
-        # 993, 168 - Australia          V
-        # 689, 708 - Russia East        V
-        # 916, 777 - Russia West        V
-        # 540, 640 - France             V
-        # 514, 596 - Spain              V
-        # 799, 481 - India              V
-        # 655, 543 - Israel area (- Middle East)    V
-        # 614, 679 - Europe East        V
-        # 868, 583 - China              V
-        # 151, 520 - Mexico             V
-        # 242, 384 - South America (N)  V
-        # 304, 103 - South America (S)  V
-        # 321, 281 - Brazil             V
-        # 613, 779 - Denmark            V
-        # 536, 509 - Algeria            V
-        # 602, 330 - Congo              V
-        # 690, 228 - Madagascar         V
-        # 605, 213 - South Africa       V
-        # 487, 846 - Greenland          V
-        # 585, 436 - Chad               V
-        # 937, 342 - Indonesia          V
-        """
-
     def start_game(self):
         # Add all countries to the map
         for country in self.countries_dic.values():
             self.add_widget(country)
-        self.finish_turn_btn.text = 'Finish My Turn'
+        self.remove_widget(self.finish_turn_btn)
+        self.finish_turn_btn = Button(text='Finish My Turn',
+                                      size=(180, 30),
+                                      pos=(100, 10),
+                                      halign="center",
+                                      bold=True,
+                                      markup=True,
+                                      font_size=25,
+                                      background_color=(0, 229.0 / 256, 214.0 / 256, 1),
+                                      border=(.9, .9, .9, .9))
+        self.finish_turn_btn.bind(on_press=self.click_finish_turn)
+        self.finish_turn_btn.background_color = (96.0 / 256, 233.0 / 256, 174.0 / 256, 1)
+        self.add_widget(self.finish_turn_btn)
+
+    def open_tutorial(self, t):
+        # Open the tutorial during the game.
+        self.popup.background = 'wall.jpg'
+        self.popup.background_color = (.1, .2, .3, 0)
+        self.popup.separator_color = (0, 0, 1, 1)
+        self.refresh_popup('PAGE 1')
+        self.popup.open()
 
     def dismiss_popup(self, instance):
         """
@@ -1107,12 +1025,15 @@ class Game(Layout, Image):
         if Game.ARMIES_LABEL_TRY.parent:
             self.remove_widget(Game.ARMIES_LABEL_TRY)
         self.start_game()
-        self.remove_widget(self.play_btn)
+        if t != self.play_ib:
+            self.remove_widget(self.play_ib)
+        self.remove_widget(t)
         if not Game.ARMIES_LABEL.parent:
             self.add_widget(Game.ARMIES_LABEL)
         self.add_widget(self.info_btn)
         self.add_widget(Game.INSTRUCTIONS_LABEL)
         self.add_widget(self.hide_instructions)
+        self.add_widget(self.tutorial_btn)
         if self.info_btn.parent:
             self.remove_widget(self.info_btn)
 
@@ -1131,7 +1052,7 @@ class Game(Layout, Image):
         Closes the instructions and shows the small info button
         """
         self.remove_widget(Game.INSTRUCTIONS_LABEL)
-        self.remove_widget(self.hide_instructions)
+        self.remove_widget(t)
         self.add_widget(self.info_btn)
 
     @staticmethod
@@ -1166,7 +1087,7 @@ class Game(Layout, Image):
         if armies_number < 0:
             armies_number = abs(armies_number)
         if armies_number > abs(source_country.armies_counter):
-            print 'Input warn ! pass_armies'
+            print 'InputWarn ! pass_armies'
             armies_number = abs(source_country.armies_counter)
 
         if des_country.control == 0:  # neutral country
@@ -1182,10 +1103,9 @@ class Game(Layout, Image):
                 des_country.change_control(1)
 
         source_country.refresh_armies_counter(source_country.armies_counter + armies_number)
-        if armies_number != 0:
-            print "Country {} passed {} armies to country {}".format(self.country_name(source_country).upper(),
-                                                                     armies_number,
-                                                                     self.country_name(des_country).upper())
+        print "Country {} passed {} armies to country {}".format(self.country_name(source_country).upper(),
+                                                                 armies_number,
+                                                                 self.country_name(des_country).upper())
 
     def country_name(self, country):
         """
@@ -1279,7 +1199,8 @@ class Game(Layout, Image):
         for c in self.countries_dic.values():
             self.add_widget(c)
 
-        change_mode('cc')
+        Game.refresh_addition_armies_label(5)
+        change_mode('aa')
 
     def yes_click(self, t):
         # Handle the click on the 'Yes' button in the popup when the game ends.
@@ -1287,7 +1208,7 @@ class Game(Layout, Image):
         self.new_game()
         self.popup.dismiss()
         self.finish_turn_btn.text = 'Finish my turn'
-        Game.ARMIES_LABEL.text = '0'
+        # Game.ARMIES_LABEL.text = '0'
 
     def no_click(self, t):
         # Handle the click on the 'No' button in the popup when the game ends.
@@ -1306,25 +1227,30 @@ class Game(Layout, Image):
             tit = 'Game Over'
             mes = 'I am the winner !! HAHA'
             winner_color = (1, 0, 0, 1)
+            looser_color = (0, 0, 1, 1)
         else:
             tit = 'You are the WINNER !'
             mes = 'My congratulations! You won !'
             winner_color = (0, 0, 1, 1)
+            looser_color = (1, 0, 0, 1)
 
         self.popup.title = tit
 
         main_grid = GridLayout(rows=3, cols=1)
-
-        main_grid.add_widget(Label(text=mes, font_size=30, halign="center", valign="middle", color=(0, 0, 0, 1)))
-        question_content = Label(text='Do you want to play again?', font_size=25, halign="center", color=(0, 0, 0, 1))
+        main_grid.add_widget(Label(text=mes, font_size=45, halign="center", valign="middle", color=winner_color,
+                                   bold=True, markup=True, size_hint_y=120))
+        question_content = Label(text='Do you want to play again?', font_size=40, halign="center", color=(0, 0, 0, 1),
+                                 size_hint_y=100)
         main_grid.add_widget(question_content)
-
-        grid_content = GridLayout(rows=1, cols=2)
-        content_yes = Button(text='Yes', size_hint_y=None, height=40, font_size=20)
-        content_no = Button(text='No', size_hint_y=None, height=40, font_size=20)
+        grid_content = GridLayout(rows=1, cols=3, size_hint_y=40)
+        content_yes = Button(text='Yes', height=40, font_size=40, bold=True, markup=True)
+        content_yes.background_color = looser_color
+        content_no = Button(text='No', height=40, font_size=40, bold=True, markup=True)
+        content_no.background_color = winner_color
         content_no.bind(on_press=self.no_click)
         content_yes.bind(on_press=self.yes_click)
         grid_content.add_widget(content_yes)
+        grid_content.add_widget(Label())
         grid_content.add_widget(content_no)
 
         main_grid.add_widget(grid_content)
@@ -1340,16 +1266,15 @@ class Game(Layout, Image):
         Checks if there is a win.
         That's mean - The user does'nt have any country OR the computer dose'nt have any country.
 
-        :return: Tuple(boolean, int):   If the boolean is True --> There is a winner.
-                                        the int shows WHO is the winner (0-No winner; 1-Computer, 2-User).
+        :return: int -> winner:  0-No winner; 1-Computer, 2-User.
 
         """
         if not self.user_blocs():
-            return True, 1
+            return 1
         elif not self.computer_blocs():
-            return True, 2
+            return 2
         else:
-            return False, 0
+            return 0
 
     def click_finish_turn(self, touch):
         """
@@ -1364,8 +1289,8 @@ class Game(Layout, Image):
             self.refresh_popup('MAIN')
             return
         # Win check
-        if self.is_win()[0]:
-            self.win_popup(self.is_win()[1])
+        if self.is_win():
+            self.win_popup(self.is_win())
             self.finish_turn_btn.text = 'Start Over'
             return
 
@@ -1374,7 +1299,7 @@ class Game(Layout, Image):
             Country.CHOSE_COUNTRY.country_click(0)
         Country.CHOSE_COUNTRY = None
         Country.TARGET_COUNTRY = None
-        Game.NOT_USER_COUNTRY_LABEL.text = ''
+        Game.INPUT_WARNING_LABEL.text = ''
 
         print "user finishes his turn,\nnow computer turn"
 
@@ -1383,8 +1308,8 @@ class Game(Layout, Image):
         self.computer_turn()
 
         # Win check
-        if self.is_win()[0]:
-            self.win_popup(self.is_win()[1])
+        if self.is_win():
+            self.win_popup(self.is_win())
             self.finish_turn_btn.text = 'Start Over'
             return
 
@@ -1406,202 +1331,6 @@ class Game(Layout, Image):
         change_mode('aa')
         Game.ARMIES_LABEL.text = '5'
         Game.ADDITION_ARMIES = 5
-
-    # UNUSED METHODS
-    '''
-    def all_options_to_divide_armies_between_blocs(self, armies_to_divide=5):
-        """
-        The function returns all the options to divide armies_to_divide between computer's blocs.
-        :param armies_to_
-        divide:
-        :return: All the options to divide the armies between computer's blocs.
-                    In the structer below:
-                        [(0, 5), (1, 4), (2, 3), (3, 2), (4, 1), (5, 0)]
-                        [Option(0), Option(1),...]
-                        Option(N) = Tuple --> (Bloc(0), Bloc(1)...)
-        """
-
-        if len(self.computer_blocs()) == 1:
-            return [(armies_to_divide)]
-
-        # ELSE
-        temp = list()
-        for x in range(armies_to_divide + 1):
-            temp.append(x)
-        # temp = [0,1,2,3,4,5]
-
-        all_options = permutations(temp, len(self.computer_blocs()))
-        all_options = filter(lambda option: sum(option) == 5, all_options)
-        return all_options
-    '''
-    '''
-    def find_bloc_by_name(self, name):
-        """
-
-        :param name: A string represents the name of the first country in the bloc.
-        :return: The *bloc, or None, if wasn't found.
-        """
-        for bloc in self.all_blocs_in_game():
-            if self.country_name(bloc[0]) == name:
-                return bloc
-        return None
-    '''
-    # Before Game:
-    # def before_game(self):
-    #     content1 = Label(text="Hello", font_size=30)
-    #     content2 = Label(text="What is your name?", font_size=25)
-    #     content3 = TextInput(multiline=False, font_size=25)
-    #     content4 = Button(text='SUBMIT', font_size=20)
-    #
-    #     content4.bind(on_press=self.submit_click)
-    #
-    #     main_content = GridLayout(rows=4, cols=1)
-    #     main_content.add_widget(content1)
-    #     main_content.add_widget(content2)
-    #     main_content.add_widget(content3)
-    #     main_content.add_widget(content4)
-    #
-    #     self.popup.title = 'INSTRUCTIONS'
-    #     self.popup.content = main_content
-    #     self.popup.open()
-    """
-        def before_next_moves_list(self):
-            after_divide_and_attack_list = list()
-            final_list = list()
-            divide_options = self.all_options_to_divide_armies_between_blocs()
-
-
-            # [[NameRepresents1: (SumArmies1, Control1, countries_number1), NameRepresents2: (SumArmies2, Control2, countries_number2)], [NameRepresents1'; (SumArmies1', Control1', countries_number1')]]
-
-            # Divide !
-            for option in divide_options:  # All divide options
-                index = 0  # The side bloc index
-                after_divide_op_dict = dict()  # All the blocs in the game showed in tuples.
-                after_attack_dict = dict()
-
-                bloc_index = 0
-                for bloc in self.all_blocs_in_game():  # All blocs in the game
-                    bloc_name = self.country_name(bloc[0])
-                    control = bloc[0].control
-
-                    bloc_sum_armies = sum_armies_in_bloc(bloc=bloc)
-                    bloc_countries_number = len(bloc)
-
-                    all_blocs_copy = copy_all_blocs(self.all_blocs_in_game())
-
-                    if control != 1:  # Not computer's bloc
-                        after_divide_op_dict[bloc_name] = (bloc_sum_armies, control, bloc_countries_number)
-
-                    else:  # Only computer's blocs
-                        saver_bloc_countries_number = len(bloc)
-
-                        # Initiate the added_armies_to_comp_bloc --> How many armies this computer's bloc need to get.
-                        try:
-                            added_armies_to_comp_bloc = option[index]
-                        except TypeError:
-                            added_armies_to_comp_bloc = option
-
-                        # Add the armies... NEGATIVE
-                        bloc_sum_armies -= added_armies_to_comp_bloc
-                        # TODO(3): Change the random here
-                        rand_country = all_blocs_copy[bloc_index][randrange(len(all_blocs_copy[bloc_index]))]
-                        rand_country.armies_counter -= added_armies_to_comp_bloc
-
-                        after_divide_op_dict[bloc_name] = (bloc_sum_armies, control, bloc_countries_number)
-
-                        # All the Options to Attack --> Tuples... every tuple's length is the length of the bloc's side_blocs.
-                        attack_options = filter(lambda x: sum(x) <= abs(bloc_sum_armies),
-                                                list(itertools.product(range(abs(bloc_sum_armies) + 1),
-                                                                       repeat=len(self.bloc_side_blocs(bloc=bloc)))))
-
-                        for attack_option in attack_options:  # Tuples...
-                            attack_index = 0  # The index in the attack_option (tuple)
-
-                            # Back to the beginning, after the adding.
-                            bloc_sum_armies = sum_armies_in_bloc(bloc=bloc) - added_armies_to_comp_bloc
-
-
-                            bloc_countries_number = saver_bloc_countries_number
-
-                            for side_bloc in self.bloc_side_blocs(bloc=bloc):  # all the side_blocs
-                                if attack_option[attack_index] == 0:  # We don't have to attack this bloc
-                                    continue
-
-                                # We have to attack this bloc
-                                side_bloc_sum_armies = sum_armies_in_bloc(bloc=side_bloc)
-                                armies_to_pass_to_this_bloc = attack_option[attack_index]
-
-                                print 'BEFORE', side_bloc_sum_armies, bloc_sum_armies, armies_to_pass_to_this_bloc
-
-                                # Side bloc details:
-                                side_bloc_control = side_bloc[0].control
-                                side_bloc_countries_number = len(side_bloc)
-
-                                if abs(side_bloc_sum_armies)+1 <= armies_to_pass_to_this_bloc:  # Must attack this bloc !
-
-                                    if side_bloc_control == 2:  # User's bloc
-                                        likely_countries_list = list()
-
-                                        for likely_country in self.list_of_likelihood_countries(bloc1=bloc,
-                                                                                                bloc2=side_bloc):
-                                            likely_countries_list.append(likely_country)
-                                            if likely_country.armies_counter+1 <= armies_to_pass_to_this_bloc:
-
-                                                # Refresh computer_bloc
-                                                bloc_sum_armies += (likely_country.armies_counter + 1)
-                                                bloc_countries_number += 1
-
-                                                # Refresh side_bloc:
-                                                side_bloc_sum_armies -= likely_country.armies_counter
-                                                side_bloc_countries_number -= 1
-
-                                                # Refresh 'armies to pass to this bloc'
-                                                armies_to_pass_to_this_bloc -= (likely_country.armies_counter + 1)
-
-                                    elif side_bloc_control == 0:  # neutral bloc
-
-                                        if abs(side_bloc_sum_armies) + 1 <= armies_to_pass_to_this_bloc:  # Can attack!
-
-                                            # Refresh computer_bloc
-                                            bloc_sum_armies += (abs(side_bloc_sum_armies) + 1)
-                                            bloc_countries_number += 1
-
-                                            # Refresh side_bloc:
-                                            side_bloc_sum_armies -= side_bloc_sum_armies
-                                            side_bloc_countries_number -= 1
-
-                                            # Refresh 'armies to pass to this bloc'
-                                            armies_to_pass_to_this_bloc -= (abs(side_bloc_sum_armies) + 1)
-
-                                attack_index += 1
-
-                                # HERE  - Add the side_bloc.
-                                print 'AFTER', side_bloc_sum_armies, bloc_sum_armies, self.country_name(side_bloc[0]), bloc_name
-
-                                the_side_bloc = (side_bloc_sum_armies, side_bloc_control, side_bloc_countries_number)
-                                if side_bloc_countries_number or True:  # Not an empty bloc
-                                    after_attack_dict[self.country_name(side_bloc[0])] = the_side_bloc
-
-                            # Here - Add the bloc.
-
-                            after_attack_dict[bloc_name] = (bloc_sum_armies, control, bloc_countries_number)
-
-                            after_divide_and_attack_list.append(copy.deepcopy(after_attack_dict))
-
-                        index += 1
-                    bloc_index += 1
-
-            print 'aaaaaaaaaaaaaaa', len(after_divide_and_attack_list)
-            after_divide_and_attack_list = reduce_list_of_dicts(list_of_dicts=after_divide_and_attack_list)
-            print 'bbbbbbbbbbbbbbb', len(after_divide_and_attack_list)
-
-            return after_divide_and_attack_list
-        def list_next_moves(self):
-
-            # TODO(History): Match to the blocs names and countries.. -> Show all boards !
-
-            the_list = self.before_next_moves_list()
-        """
 
     def how_many_armies_to_add(self, bloc):
         """
@@ -1625,9 +1354,16 @@ class Game(Layout, Image):
         return side_countries_hefreshim
 
     def try_it_click(self, t):
-        # Try btn callback. In thetutorial.
+        # Try btn callback. In the tutorial.
         self.refresh_popup('TRY ADD ARMIES')
         return
+
+    def skip_popup(self, t):
+        self.popup.dismiss()
+        if Game.ARMIES_LABEL_TRY.parent:
+            self.remove_widget(Game.ARMIES_LABEL_TRY)
+        if Game.YELLOW_SQUARE and Game.YELLOW_SQUARE.parent:
+            self.remove_widget(Game.YELLOW_SQUARE)
 
     def refresh_popup(self, title):
         """
@@ -1638,16 +1374,19 @@ class Game(Layout, Image):
         """
 
         if title == 'MAIN':
-            content1 = Label(text="Hello", font_size=40, color=(0, 0, 0, 1))
-            content2 = Label(text="What is your name?", font_size=25, halign="center", color=(0, 0, 0, 1))
+            content1 = Label(text="Hello", font_size=40, color=(69.0 / 256, 55.0 / 256, 159.0 / 256, 1), size_hint_y=8)
+            content2 = Label(text="What is your name?", font_size=25, halign="center",
+                             color=(69.0 / 256, 55.0 / 256, 159.0 / 256, 1),
+                             size_hint_y=10)
 
-            content3 = TextInput(multiline=False, font_size=25)
+            content3 = TextInput(multiline=False, font_size=25, size_hint_y=10)
             content3.text = Game.USER_NAME
             print "Size = ", content3.size
             content3.padding_x = content3.size[0] / 2
             content3.padding_y = 10
 
-            content4 = Button(text='SUBMIT', font_size=20)
+            content4 = Button(text='SUBMIT', font_size=30, background_color=(.62, .78, 55.0 / 256, .8),
+                              markup=True, bold=True, size_hint_y=5)
             content4.bind(on_press=self.next_popup)
 
             main_content = GridLayout(rows=4, cols=1)
@@ -1656,7 +1395,7 @@ class Game(Layout, Image):
             main_content.add_widget(content3)
             main_content.add_widget(content4)
 
-            self.popup.title = 'INSTRUCTION'
+            self.popup.title = 'INSTRUCTIONS'
             self.popup.content = main_content
             self.popup.open()
 
@@ -1678,13 +1417,19 @@ class Game(Layout, Image):
                                   ' Above any country there is a number'
                                   ' symbolizes the number of armies in the country.',
                              font_size=22, color=(1, 1, 0, 1), halign="left", size_hint_y=5)
-            content6 = GridLayout(row=1, cols=2, size_hint_y=4)
-            content61 = Button(text='BACK', font_size=22, color=(0, 0, 0, 1))
-            content61.bind(on_press=self.previous_popup)
-            content62 = Button(text='OK, Next', font_size=22, color=(1, 1, 1, 1))
-            content62.bind(on_press=self.next_popup)
-            content6.add_widget(content61)
-            content6.add_widget(content62)
+            if self.popup.background_color == [.1, .2, .3, 0]:  # During the game.
+                content6 = GridLayout(rows=1, cols=2)
+                skip_btn = Button(text='SKIP', font_size=22, color=(1, 1, 1, 1), background_color=(0, 0, 1, 0.8))
+                skip_btn.bind(on_press=self.skip_popup)
+                next_btn = Button(text='OK, Next', font_size=22, color=(1, 1, 1, 1), background_color=(0, 1, 0, 0.8))
+                next_btn.bind(on_press=self.next_popup)
+                content6.add_widget(skip_btn)
+                content6.add_widget(next_btn)
+
+            else:
+                content6 = self.bottom_line_in_popup()
+            content6.size_hint_y = 4
+
             main_content = GridLayout(rows=6, cols=1)
             main_content.add_widget(content1)
             main_content.add_widget(content2)
@@ -1701,14 +1446,8 @@ class Game(Layout, Image):
             who_win_content = Label(text='[b]' + add_enter_in_instruction(Game.RES_DICT['who_win'], 60) + '[/b]',
                                     font_size=32, size_hint_y=10, color=(.2, .21, .8, 1), markup=True)
 
-            content1 = GridLayout(rows=1, cols=2)
-            content11 = Button(text='BACK', size_hint_y=1, font_size=18, color=(0, 0, 0, 1))
-            content11.bind(on_press=self.previous_popup)
-            content12 = Button(text='OK, NEXT', size_hint_y=1,
-                               font_size=18, color=(1, 1, 1, 1))
-            content12.bind(on_press=self.next_popup)
-            content1.add_widget(content11)
-            content1.add_widget(content12)
+            content1 = self.bottom_line_in_popup()
+            content1.size_hint_y = 1.5
 
             main_content = GridLayout(rows=2, cols=1)
             main_content.add_widget(who_win_content)
@@ -1724,7 +1463,7 @@ class Game(Layout, Image):
                 self.add_widget(Game.YELLOW_SQUARE)
                 self.add_widget(Game.ARMIES_LABEL_TRY)
 
-            content1 = GridLayout(rows=1, cols=2, size_hint_x=50)
+            content1 = GridLayout(rows=1, cols=2, size_hint_x=80)
             content1.add_widget(Label(size_hint_x=1))  # Margin...
             content12 = Label(
                 text=add_enter_in_instruction(Game.RES_DICT['at_beginning_add'], 50) + '\n' +
@@ -1734,20 +1473,22 @@ class Game(Layout, Image):
             content2 = Image(source='arrow_yellow.png', size_hint_x=35, size_hint_y=30)
 
             content3 = GridLayout(rows=1, cols=2, size_hint_y=3)
-            content31 = Button(text='BACK', font_size=22, size_hint_x=2, color=(0, 0, 0, 1))
+            content31 = Button(text='BACK', font_size=22, color=(0, 0, 0, 1), background_color=(1, 0, 0, 0.8))
             content31.bind(on_press=self.previous_popup)
             content3.add_widget(content31)
             content3.add_widget(Label(size_hint_x=5))
 
-            content4 = GridLayout(rows=2, cols=2, size_hint_y=3)
-            content42 = Button(text='Next', font_size=22)
+            content4 = GridLayout(rows=2, cols=2, size_hint_y=4, spacing=8)
+            content42 = Button(text='Next', font_size=22, color=(1, 1, 1, 1), background_color=(0, 1, 0, 0.8))
             content42.bind(on_press=self.next_popup)
-            content41 = Button(text='Try It', font_size=22, color=(1, 1, 0, 1))
+            content41 = Button(text='Try It', font_size=22, color=(0, 0, 0, 1), background_normal='yellow.png')
             content41.bind(on_press=self.try_it_click)
             content4.add_widget(content41)
             content4.add_widget(content42)
 
             main_content = GridLayout(rows=2, cols=2)
+            main_content.spacing = 10
+
             main_content.add_widget(content1)
             main_content.add_widget(content2)
             main_content.add_widget(content3)
@@ -1766,7 +1507,7 @@ class Game(Layout, Image):
             content2.bind(on_press=self.previous_popup)
 
             content3 = Label(text='[b]You can add armies till the number at the right-top corner is 0.[/b]',
-                             font_size=30, pos=(500, 350), color=(1, 1, 0, 1), markup=True)
+                             font_size=30, pos=(120, 350), color=(71.0 / 256, 79.0 / 256, 0, 1), markup=True)
 
             main_content.add_widget(content1)
             main_content.add_widget(content2)
@@ -1787,21 +1528,18 @@ class Game(Layout, Image):
             main_content = GridLayout(rows=7, cols=1)
             content1 = Label(
                 text=add_enter_in_instruction(Game.RES_DICT['tot_p4_main'], 60) +
-                '\n*Double click on the same country - will close it.',
+                     '\n*Double click on the same country - will close it.',
                 font_size=20, color=(0, 0, 0, 1), halign="left", size_hint_y=30)
             note_content1 = Label(
-                text=Game.RES_DICT['short_cut_numbers'],
-                color=(1, 1, 0, 1), font_size=18, halign="left", size_hint_y=10)
+                text=Game.RES_DICT['shortcut_numbers'],
+                color=(71.0 / 256, 79.0 / 256, 0, 1), font_size=18, halign="left", size_hint_y=10)
             note_content2 = Label(
-                text=Game.RES_DICT['short_cut_space'],
-                color=(1, 1, 0, 1), font_size=18, halign="left", size_hint_y=10)
-
-
-
+                text=Game.RES_DICT['shortcut_space'],
+                color=(71.0 / 256, 79.0 / 256, 0, 1), font_size=18, halign="left", size_hint_y=10)
 
             content2 = GridLayout(rows=5, cols=1, size_hint_y=15)
             content21 = Label(text='Pass to your other country which is near the first country: ',
-                             color=(0, 0, 0, 1), font_size=18, halign='left')
+                              color=(0, 0, 0, 1), font_size=18, halign='left')
             content2.add_widget(content21)
             country1 = Country(2, [], 2, (600, 490), is_tot=True, armies_counter=3)
             country2 = Country(2, [country1], 2, (500, 490), is_tot=True, armies_counter=2)
@@ -1812,8 +1550,7 @@ class Game(Layout, Image):
             content2.add_widget(country3)
 
             content3 = Label(text='Pass to other countries and decrease their armies counter or conquer them: ',
-            #                   # TODO(1) Chage this text font_size "\n*In the game, country you've just conquered would be yours only in the next turn.",
-                              color=(0, 0, 0, 1), font_size=18, halign='left', size_hint_y=15)
+                             color=(0, 0, 0, 1), font_size=18, halign='left', size_hint_y=15)
 
             content4 = GridLayout(rows=1, cols=3, size_hint_y=15)
             country4 = Country(2, [], 2, (600, 395), is_tot=True, armies_counter=7)
@@ -1824,14 +1561,8 @@ class Game(Layout, Image):
             content4.add_widget(country5)
             content4.add_widget(country6)
 
-            content5 = GridLayout(rows=1, cols=2, size_hint_y=10)
-            content51 = Button(text='BACK', font_size=22, color=(0, 0, 0, 1))
-            content52 = Button(text='NEXT', font_size=22)
-            content51.bind(on_press=self.previous_popup)
-            content52.bind(on_press=self.next_popup)
-
-            content5.add_widget(content51)
-            content5.add_widget(content52)
+            content5 = self.bottom_line_in_popup()
+            content5.size_hint_y = 12
 
             main_content.add_widget(content1)
             main_content.add_widget(content2)
@@ -1849,27 +1580,38 @@ class Game(Layout, Image):
             self.popup.title = title
             main_content = GridLayout(rows=5, cols=1)
             content1 = Label(
-                text=add_enter_in_instruction('[b]When you finish your turn, click on the button in the left-bottom corner- "Finish My Turn"[/b]', 30),
+                text=add_enter_in_instruction(
+                    '[b]When you finish your turn, click on the button in the left-bottom corner- "Finish My Turn"[/b]',
+                    30),
                 font_size=35, halign='center', color=(.2, .21, .8, 1), markup=True, size_hint_y=100)
 
-            content5 = GridLayout(rows=1, cols=2, size_hint_y=10)
-            content51 = Button(text='BACK', font_size=22, color=(0, 0, 0, 1))
-            content52 = Button(text='NEXT', font_size=22)
-            content51.bind(on_press=self.previous_popup)
-            content52.bind(on_press=self.next_popup)
-
-            content5.add_widget(content51)
-            content5.add_widget(content52)
+            if self.popup.background_color == [.1, .2, .3, 0]:  # During the game.
+                content2 = GridLayout(rows=1, cols=2, size_hint_y=12)
+                content21 = Button(text='BACK', font_size=22, color=(0, 0, 0, 1), background_color=(1, 0, 0, 0.8))
+                content21.bind(on_press=self.previous_popup)
+                content22 = Button(text='FINISH', font_size=25, background_color=(0, 1, 0, 1), color=(1, 1, 1, 1))
+                content22.bind(on_press=self.skip_popup)
+                content2.add_widget(content21)
+                content2.add_widget(content22)
+            else:
+                content2 = self.bottom_line_in_popup()
+                content2.size_hint_y = 12
 
             main_content.add_widget(content1)
-            main_content.add_widget(content5)
+            main_content.add_widget(content2)
             self.popup.content = main_content
 
         elif title == "LET'S PLAY":
             self.popup.title = title
-            main_content = FloatLayout()
-            lets_play_btn = ImageButton(source='crossed_swords.jpg', click_fun=self.play_btn_click, pos=(500, 500), size=(1000,1000))
-            self.popup.content = lets_play_btn
+            main_content = GridLayout(rows=2, cols=1)
+            lets_play_btn = ImageButton(source='crossed_swords_start_game.png', click_fun=self.play_btn_click,
+                                        size=(1000, 1000), pos=(500, 500))
+            back_btn = Button(text='BACK', font_size=22, color=(0, 0, 0, 1), size_hint_y=.1,
+                              background_color=(226.0 / 256, 113.0 / 256, 113.0 / 256, 1), markup=True, bold=True)
+            back_btn.bind(on_press=self.previous_popup)
+            main_content.add_widget(lets_play_btn)
+            main_content.add_widget(back_btn)
+            self.popup.content = main_content
             # TODO(!) Continue from here !
 
     def previous_popup(self, t):
@@ -1888,6 +1630,8 @@ class Game(Layout, Image):
             self.refresh_popup('PAGE 3')
         elif self.popup.title == 'PAGE 5':
             self.refresh_popup('PAGE 4')
+        elif self.popup.title == "LET'S PLAY":
+            self.refresh_popup('PAGE 5')
 
     def next_popup(self, t):
         """
@@ -1925,6 +1669,24 @@ class Game(Layout, Image):
             Game.USER_NAME = self.popup.content.children[1].text
             self.refresh_popup('PAGE 1')
             print 'USER NAME = ', Game.USER_NAME
+
+    def bottom_line_in_popup(self):
+        """
+
+        :return: Grid layout contains Back, Skip and Next buttons.
+        """
+        bottom_line = GridLayout(row=1, cols=3)
+        back_btn = Button(text='BACK', font_size=22, color=(0, 0, 0, 1), background_color=(1, 0, 0, 0.8))
+        back_btn.bind(on_press=self.previous_popup)
+        skip_btn = Button(text='SKIP', font_size=22, color=(1, 1, 1, 1), background_color=(0, 0, 1, 0.8))
+        skip_btn.bind(on_press=self.skip_popup)
+        next_btn = Button(text='OK, Next', font_size=22, color=(1, 1, 1, 1), background_color=(0, 1, 0, 0.8))
+        next_btn.bind(on_press=self.next_popup)
+        bottom_line.add_widget(back_btn)
+        bottom_line.add_widget(skip_btn)
+        bottom_line.add_widget(next_btn)
+
+        return bottom_line
 
     # My AI
     def ai_divide_armies_between_blocs(self, armies_to_divide=5):
@@ -2000,35 +1762,6 @@ class Game(Layout, Image):
                     print "klklklklkl"
                     self.bloc_conquer_bloc(self.country_bloc(side_easy_killing), easy_kill)
 
-        # ORNA KILLING ?
-        # if 1 == len(self.user_blocs()): # User's last block
-        #     last_user_block = self.user_blocs()[0]
-        #     comp_adv = 0
-        #     for comp_bloc in computer_blocs:
-        #         bool5 = True
-        #         if are_side_blocs(last_user_block, comp_bloc):
-        #             comp_adv += abs(sum_armies_in_bloc(comp_bloc))
-        #             bool5 = False
-        #         for nat_bloc in neutral_blocs:  # All neutral blocs
-        #             if bool5:
-        #                 if are_side_blocs(bloc1=nat_bloc, bloc2=comp_bloc):  # We Can conquer nat_bloc
-        #
-        #                     for nat_side_bloc in self.bloc_side_blocs(bloc=nat_bloc):
-        #                         if bool5:
-        #                             if nat_side_bloc[0].control == 2:  # nat_bloc has a user's as a side_bloc
-        #                                 comp_adv += abs(sum_armies_in_bloc(comp_bloc)) - sum_armies_in_bloc(nat_side_bloc)
-        #                                 bool5 = False
-        #
-        #     if comp_adv > sum_armies_in_bloc(last_user_block):
-        #         for comp_bloc in computer_blocs:  # All computer's blocs
-        #             if are_side_blocs(last_user_block, comp_bloc):
-        #                 for comp_country in comp_bloc:
-        #                     if comp_country.armies_counter != 0:
-        #                         for kill_country in self.list_of_likelihood_countries(comp_bloc, last_user_block):
-        #                             if comp_country.armies_counter != 0:
-        #                                 self.pass_armies(comp_country, comp_country.armies_counter, kill_country)
-        #     return
-
         for comp_bloc in computer_blocs:
             comp_bloc_sum_armies = sum_armies_in_bloc(bloc=comp_bloc)
 
@@ -2062,10 +1795,6 @@ class Game(Layout, Image):
                                 print "Let's get closer to the user !! "
                                 self.bloc_conquer_bloc(offence_bloc=comp_bloc, attacked_bloc=nat_bloc)
 
-
-                                # TODO(3) Divide the armies in the bloc !!!
-                                # self.ai_divide_armies_in_bloc(bloc=comp_bloc)
-
     def bloc_conquer_bloc(self, offence_bloc, attacked_bloc):
         """
         pass armies from offence_bloc to attacked_bloc and try to conquer it.
@@ -2086,9 +1815,8 @@ class Game(Layout, Image):
             return
 
         need_to_pass = abs(sum_armies_in_bloc(bloc=attacked_bloc)) + 1
-        if len(attacked_bloc) == 1 and attacked_bloc[0].control == 2:
-            # Easy Kill
-            if need_to_pass <= abs(sum_armies_in_bloc(bloc=offence_bloc)):
+        if len(attacked_bloc) == 1 and attacked_bloc[0].control == 2:  # If Easy Kill
+            if need_to_pass <= abs(sum_armies_in_bloc(bloc=offence_bloc)):  # If We can Kill
                 print "Kill the user country !!"
                 for comp_country in offence_bloc:
                     if comp_country.armies_counter:
@@ -2101,14 +1829,12 @@ class Game(Layout, Image):
                             attacked_bloc[0].change_control(1)
                             comp_country.sub_armies_to_country(need_to_pass)
                             need_to_pass = 0
-
                 return
 
         else:
-            # How many armies we need to every country?
-            armies_to_conq_likelihoods = dict()
-            if attacked_bloc[0].control == 2:
-                pass
+            # Check how many armies to pass to the likelihood countries
+
+            armies_to_conq_likelihoods = dict()  # How many armies we need to every country?
             for likely_country in self.list_of_likelihood_countries(offence_bloc, attacked_bloc):
                 # likely_country - NOT computer's country
                 armies_to_conq_likelihoods[likely_country] = abs(likely_country.armies_counter) + 1
@@ -2116,11 +1842,13 @@ class Game(Layout, Image):
             # Let's conquer !
             if sum(armies_to_conq_likelihoods.values()) <= abs(sum_armies_in_bloc(bloc=offence_bloc)):
                 # OK, We can do this
-                if attacked_bloc[0].control == 2:
+                if attacked_bloc[0].control == 2:  # Prints
                     print 'OK, We can do this !! '
                     print 'user sum_armies likely...', sum(armies_to_conq_likelihoods.values()), self.country_name(
                         attacked_bloc[0])
                     print 'abs(sum_armies_in_bloc(bloc=offence_bloc))', abs(sum_armies_in_bloc(bloc=offence_bloc))
+
+                not_comp_likely_country = None
 
                 for likely_country in self.list_of_likelihood_countries(attacked_bloc, offence_bloc):
                     # likely_country - computer's country
@@ -2138,8 +1866,8 @@ class Game(Layout, Image):
 
                     else:
                         for not_comp_likely_country in self.list_of_likelihood_countries(offence_bloc, attacked_bloc):
-                            if abs(likely_country.armies_counter) >= armies_to_conq_likelihoods[
-                                not_comp_likely_country]:
+                            if abs(likely_country.armies_counter) >= \
+                                    armies_to_conq_likelihoods[not_comp_likely_country]:
                                 # Conquer this country right now !
                                 self.pass_armies(source_country=likely_country,
                                                  armies_number=armies_to_conq_likelihoods[not_comp_likely_country],
@@ -2147,6 +1875,7 @@ class Game(Layout, Image):
                                 armies_to_conq_likelihoods[not_comp_likely_country] = 0
 
                             else:
+                                # Only attack this country, without conquer it.
                                 armies_to_conq_likelihoods[not_comp_likely_country] -= abs(
                                     likely_country.armies_counter)
                                 self.pass_armies(source_country=likely_country,
@@ -2154,7 +1883,7 @@ class Game(Layout, Image):
                                                  des_country=not_comp_likely_country)
 
                 if sum(armies_to_conq_likelihoods.values()) < abs(sum_armies_in_bloc(bloc=offence_bloc)):
-                    if not_comp_likely_country.control == 2:
+                    if not_comp_likely_country and not_comp_likely_country.control == 2:
                         print self.country_name(not_comp_likely_country)
                     for comp_country in offence_bloc:
                         if comp_country.armies_counter:
@@ -2178,72 +1907,11 @@ class Game(Layout, Image):
                 print "{} couldn't conquer {}".format(self.country_name(offence_bloc[0]),
                                                       self.country_name(attacked_bloc[0]))
 
-    def ai_divide_armies_in_bloc(self, bloc):
-        """
-        Divides the armies between the countries in the bloc.
-        Prefers to put the armies in the *ext countries
-
-        :param bloc: * Bloc
-        :return: None
-        """
-        if bloc[0].control != 1 or len(bloc) == 1:
-            return
-        sum_armies = abs(sum_armies_in_bloc(bloc=bloc))
-        ext_countries = ext_countries_in_bloc(bloc=bloc)
-        print "LENLEN", len(ext_countries), len(bloc)
-
-        temp = 0
-        # Take the armies form the inner countries.
-        for c in bloc:
-            if c not in ext_countries:
-                temp += abs(c.armies_counter)
-                c.armies_counter = 0
-
-        print'(*)T E M P', temp
-
-        # How many armies every country needs.
-        out_countries_enemies_sum = list()
-        counter = 0
-        for out_country in ext_countries:
-            enemy_sum = 0
-            for side_country in out_country.side_countries:
-                if side_country.control == 2:
-                    enemy_sum += side_country.armies_counter
-            out_countries_enemies_sum.append((counter, out_country, enemy_sum))
-
-        sum_enemies = sum(map(lambda a: a[2], out_countries_enemies_sum))
-        print "SSSS", sum_enemies
-        # if sum(out_countries_enemies_sum.values()) <= sum_armies:
-        #     for c in out_countries_enemies_sum.keys():
-        #         print "C = ", c.armies_counter, "1+out_countries_enemies_sum[c] = ", 1+out_countries_enemies_sum[c]
-        #         if abs(c.armies_counter) > 1+out_countries_enemies_sum[c]:
-        #             # Take armies from the strong countries
-        #             temp += abs(c.armies_counter)-1 - out_countries_enemies_sum[c]
-        #             c.armies_counter = -(out_countries_enemies_sum[c] + 1)
-        #     for c in out_countries_enemies_sum.keys():
-        #         print "C = ", c.armies_counter, "1+out_countries_enemies_sum[c] = ", 1+out_countries_enemies_sum[c]
-        #         if abs(c.armies_counter) < 1+out_countries_enemies_sum[c]:
-        #             need_to_get = 1+out_countries_enemies_sum[c] - abs(c.armies_counter)
-        #             if temp >= need_to_get:
-        #                 # Give armies to the weak countries.
-        #                 c.armies_counter = need_to_get
-        #                 temp -= need_to_get
-        #
-        #
-        # elif temp:
-        #     ttt = 0
-        #     while temp:
-        #         if temp >= sorted(out_countries_enemies_sum.values())[ttt]:
-        #             find_min_value_s_key(dic=out_countries_enemies_sum)
-
-
-        print "EEEEEEEEEEEEEEE", out_countries_enemies_sum
-        print 'T E M P ', temp
-
 
 class WarGameApp(App):
     def build(self):
         countries_dic = create_start_countries_dict()
+        print 'side_countries = ', countries_dic['egypt'].side_countries
         return Game(countries_dic)
 
 
