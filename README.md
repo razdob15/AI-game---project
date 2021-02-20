@@ -1,4 +1,4 @@
-# AI-game---project
+# Risk-game-AI
 ***The world war game***
 
 Hi,
